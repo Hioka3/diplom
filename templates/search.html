@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="form-card"><p class="eyebrow">поиск</p><h1>Поиск по порталу</h1><form class="filters-panel compact-filters" method="get"><input name="q" value="{{ q }}" placeholder="Новости, сотрудники, события"><button class="btn primary">Найти</button></form></section>
+{% if q %}
+<section class="search-results">
+  <div class="table-card"><h2>Новости</h2><table>{% for p in results.posts %}<tr><td><a href="{{ url_for('post_detail', post_id=p.id) }}">{{ p.title }}</a><br><small>{{ p.short_text }}</small></td><td>{{ p.category_name }}</td></tr>{% else %}<tr><td>Новостей не найдено.</td></tr>{% endfor %}</table></div>
+  <div class="table-card"><h2>Сотрудники</h2><table>{% for u in results.users %}<tr><td><a href="{{ url_for('employee_public', user_id=u.id) }}">{{ u.full_name }}</a><br><small>{{ u.position or '' }} · {{ u.department or '' }}</small></td></tr>{% else %}<tr><td>Сотрудники не найдены.</td></tr>{% endfor %}</table></div>
+  <div class="table-card"><h2>События</h2><table>{% for e in results.events %}<tr><td>{{ e.event_date.strftime('%d.%m.%Y') }}</td><td>{{ e.title }}<br><small>{{ e.location or '' }} · {{ e.department or '' }}</small></td></tr>{% else %}<tr><td>События не найдены.</td></tr>{% endfor %}</table></div>
+</section>
+{% endif %}
+{% endblock %}

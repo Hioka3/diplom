@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="form-card settings-card">
+  <p class="eyebrow">оповещения</p>
+  <h1>Настройка всплывающих оповещений</h1>
+  <p class="muted">Оповещение показывается сотрудникам в правом нижнем углу при появлении важной новости.</p>
+  <form method="post" class="stack-form">
+    <label class="check"><input type="checkbox" name="notifications_enabled" {% if settings.get('notifications_enabled') == '1' %}checked{% endif %}> Включить всплывающие уведомления о важных новостях</label>
+    <label>Текст уведомления
+      <textarea name="notification_text" rows="4" placeholder="Например: Опубликована важная корпоративная новость.">{{ settings.get('notification_text','') }}</textarea>
+    </label>
+    <div class="actions">
+      <button class="btn primary" type="submit">Сохранить настройки</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

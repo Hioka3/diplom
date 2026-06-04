@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="admin-layout wide users-page">
+  <form class="form-card compact users-form-card" method="post">
+    <p class="eyebrow">пользователи</p>
+    <h1>Новый пользователь</h1>
+    <div class="stack-form">
+      <label>Логин<input name="username" required></label>
+      <label>ФИО<input name="full_name" required></label>
+      <label>Пароль<input name="password" type="password" required></label>
+      <label>Отдел<input name="department"></label>
+      <label>Должность<input name="position"></label>
+      <label>Роль
+        <select name="role">
+          <option value="employee">Сотрудник</option>
+          <option value="editor">Редактор</option>
+          <option value="admin">Администратор</option>
+        </select>
+      </label>
+      <div class="actions"><button class="btn primary" type="submit">Создать</button></div>
+    </div>
+  </form>
+  <section class="table-card users-table-card">
+    <p class="eyebrow">доступ</p>
+    <h1>Пользователи и роли</h1>
+    <div class="table-responsive">
+      <table class="admin-table users-table">
+        <thead>
+          <tr><th>ID</th><th>Сотрудник</th><th>Подразделение</th><th>Роль</th><th>Изменить роль</th></tr>
+        </thead>
+        <tbody>
+        {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td><a href="{{ url_for('employee_public', user_id=u.id) }}">{{ u.full_name }}</a><br><small>{{ u.username }}</small></td>
+            <td>{{ u.department or '—' }}<br><small>{{ u.position or '' }}</small></td>
+            <td>{{ roles[u.role] }}</td>
+            <td>
+              <form class="inline-form role-form" method="post" action="{{ url_for('user_role_update', user_id=u.id) }}">
+                <select name="role">
+                  <option value="employee" {% if u.role == 'employee' %}selected{% endif %}>Сотрудник</option>
+                  <option value="editor" {% if u.role == 'editor' %}selected{% endif %}>Редактор</option>
+                  <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Администратор</option>
+                </select>
+                <button class="btn ghost" type="submit">Сохранить</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+{% endblock %}

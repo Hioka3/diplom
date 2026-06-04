@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="portal-layout">
+  <aside class="category-sidebar">
+    <div class="category-title">Категории</div>
+    <a class="category-link {% if not filters.get('category') %}active{% endif %}" href="{{ url_for('index') }}"><span>Все публикации</span><b>{{ posts_total }}</b></a>
+    {% for c in categories %}
+      <a class="category-link {% if filters.get('category') == c.id|string %}active{% endif %}" href="{{ url_for('index', category=c.id, department=filters.get('department',''), tag=filters.get('tag','')) }}"><span>{{ c.name }}</span><b>{{ c.posts_count }}</b></a>
+    {% endfor %}
+    <div class="category-title second">Теги</div>
+    {% for tag in tags %}
+      <a class="tag-link {% if filters.get('tag') == tag.name %}active{% endif %}" href="{{ url_for('index', tag=tag.name) }}">#{{ tag.name }} <b>{{ tag.cnt }}</b></a>
+    {% else %}<p class="muted small-text">Теги появятся после публикации новостей.</p>{% endfor %}
+  </aside>
+
+  <div class="portal-main">
+    <section class="hero-panel">
+      <div>
+        <p class="eyebrow">{{ now().strftime('%d.%m.%Y') }}</p>
+        <h1>Лента корпоративных новостей</h1>
+        <p class="hero-text">Новости компании, важные объявления, публикации по подразделениям, теги, поиск, комментарии и реакции сотрудников.</p>
+      </div>
+      {% if current_user.role in ['admin','editor'] %}<a class="btn primary" href="{{ url_for('post_new') }}">Создать публикацию</a>{% endif %}
+    </section>
+
+    <form class="filters-panel compact-filters" method="get">
+      {% if filters.get('category') %}<input type="hidden" name="category" value="{{ filters.get('category') }}">{% endif %}
+      <input name="q" value="{{ filters.get('q','') }}" placeholder="Поиск по новостям">
+      <select name="department">
+        <option value="">Все подразделения</option>
+        {% for d in departments %}<option value="{{ d }}" {% if filters.get('department') == d %}selected{% endif %}>{{ d }}</option>{% endfor %}
+      </select>
+      <input name="tag" value="{{ filters.get('tag','') }}" placeholder="Тег">
+      <input type="date" name="date_from" value="{{ filters.get('date_from','') }}">
+      <input type="date" name="date_to" value="{{ filters.get('date_to','') }}">
+      <button class="btn primary" type="submit">Найти</button>
+      <a class="btn ghost" href="{{ url_for('index') }}">Сброс</a>
+    </form>
+
+    <section class="feed-column">
+      {% for post in posts %}
+      <article class="news-post {% if post.is_important %}important{% endif %}" id="post-{{ post.id }}">
+        {% if post.image_path and post.image_path.split('.')[-1].lower() in ['png','jpg','jpeg','gif','webp'] %}
+          <div class="news-cover"><img src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="{{ post.title }}"></div>
+        {% endif %}
+        <div class="post-body">
+          <div class="post-meta-row">
+            <div class="meta-left"><span class="category-chip soft">{{ post.category_name }}</span>{% if post.is_important %}<span class="badge-flag small">Закреплено</span>{% endif %}</div>
+            <time>{{ post.published_at.strftime('%d.%m.%Y %H:%M') }}</time>
+          </div>
+          <h2><a href="{{ url_for('post_detail', post_id=post.id) }}">{{ post.title }}</a></h2>
+          <p class="post-excerpt">{{ post.short_text }}</p>
+          <div class="post-tags">{% for tag in post.tags %}<a href="{{ url_for('index', tag=tag) }}">#{{ tag }}</a>{% endfor %}</div>
+          <div class="post-info-line"><span>Подразделение: {{ post.department or 'Все подразделения' }}</span><span>Просмотры: {{ post.views_count }}</span></div>
+          <div class="reaction-summary">
+            {% for reaction in post.reaction_summary %}<span class="reaction-badge">{{ reaction.emoji }} {{ reaction.cnt }}</span>{% endfor %}
+          </div>
+          <div class="post-actions">
+            <form method="post" action="{{ url_for('post_like', post_id=post.id, next=request.full_path ~ '#post-' ~ post.id) }}"><button class="action-btn {% if post.current_user_liked %}active{% endif %}" type="submit">Нравится {{ post.likes_count }}</button></form>
+            <a class="action-btn linkish" href="{{ url_for('post_detail', post_id=post.id) }}#comments">Комментарии {{ post.comments_count }}</a>
+            <div class="emoji-strip">{% for emoji in reaction_emojis %}<form method="post" action="{{ url_for('post_reaction', post_id=post.id, next=request.full_path ~ '#post-' ~ post.id) }}"><input type="hidden" name="emoji" value="{{ emoji }}"><button class="emoji-btn" type="submit">{{ emoji }}</button></form>{% endfor %}</div>
+          </div>
+          <div class="post-footer"><small>Автор: <a href="{{ url_for('employee_public', user_id=post.author_id) }}">{{ post.author_name }}</a></small><a class="read-more" href="{{ url_for('post_detail', post_id=post.id) }}">Читать полностью →</a></div>
+        </div>
+      </article>
+      {% else %}<div class="empty-card">Новостей по выбранным параметрам не найдено.</div>{% endfor %}
+    </section>
+  </div>
+</div>
+{% endblock %}

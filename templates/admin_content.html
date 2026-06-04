@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="form-card section-head-card">
+  <p class="eyebrow">контент</p>
+  <h1>Управление материалами</h1>
+  <div class="actions"><a class="btn primary" href="{{ url_for('post_new') }}">Новая публикация</a></div>
+</section>
+<section class="table-card content-table-card">
+  <div class="table-responsive">
+    <table class="admin-table content-table">
+      <thead>
+        <tr>
+          <th>Дата</th>
+          <th>Публикация</th>
+          <th>Категория</th>
+          <th>Автор</th>
+          <th>Статистика</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for p in posts %}
+        <tr>
+          <td class="date-cell">{{ p.published_at.strftime('%d.%m.%Y') }}</td>
+          <td class="post-title-cell">{% if p.is_important %}<span class="badge-flag small">Закреплено</span>{% endif %} <a href="{{ url_for('post_detail', post_id=p.id) }}">{{ p.title }}</a><br><small>{{ p.department or 'Все подразделения' }}</small></td>
+          <td>{{ p.category_name }}</td>
+          <td>{{ p.author_name }}</td>
+          <td class="stats-cell">{{ p.views_count }} просмотров<br>{{ p.comments_count }} комментариев</td>
+          <td class="actions-cell">
+            <div class="table-actions stacked-actions">
+              <a class="btn ghost" href="{{ url_for('post_edit', post_id=p.id) }}">Редактировать</a>
+              <form method="post" action="{{ url_for('post_delete', post_id=p.id) }}" data-confirm="Удалить публикацию?">
+                <button class="btn danger" type="submit">Удалить</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

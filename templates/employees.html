@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="form-card"><p class="eyebrow">справочник</p><h1>Сотрудники</h1><form class="filters-panel compact-filters" method="get"><input name="q" value="{{ filters.get('q','') }}" placeholder="ФИО, должность, email"><select name="department"><option value="">Все отделы</option>{% for d in departments %}<option value="{{ d }}" {% if filters.get('department') == d %}selected{% endif %}>{{ d }}</option>{% endfor %}</select><button class="btn primary">Найти</button><a class="btn ghost" href="{{ url_for('employees') }}">Сброс</a></form></section>
+<section class="employee-grid">{% for u in users %}<a class="employee-card" href="{{ url_for('employee_public', user_id=u.id) }}">{% if u.avatar_path %}<img src="{{ url_for('uploaded_file', filename=u.avatar_path) }}">{% else %}<span class="employee-avatar">{{ u.full_name[:1] }}</span>{% endif %}<h3>{{ u.full_name }}</h3><p>{{ u.position or roles[u.role] }}</p><small>{{ u.department or 'Отдел не указан' }}</small></a>{% else %}<div class="empty-card">Сотрудники не найдены.</div>{% endfor %}</section>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Регистрация сотрудника{% endblock %}
+{% block content %}
+<section class="auth-page">
+  <div class="auth-form-shell register-shell">
+    <div class="sign-in-section">
+      <h6>&lt; CORPORATE ACCOUNT /&gt;</h6>
+      <h1>Регистрация</h1>
+      <ul class="portal-icons">
+        <li>Ф</li>
+        <li>Л</li>
+        <li>О</li>
+      </ul>
+      <p>Создайте учётную запись сотрудника для просмотра новостей, комментариев и реакций</p>
+
+      <form method="post">
+        <div class="form-field">
+          <label for="full_name">ФИО сотрудника</label>
+          <input id="full_name" name="full_name" type="text" placeholder="Иванов Иван Иванович" required>
+        </div>
+        <div class="form-field">
+          <label for="username">Логин</label>
+          <input id="username" name="username" type="text" placeholder="ivanov" required>
+        </div>
+        <div class="form-field">
+          <label for="email">Корпоративная почта</label>
+          <input id="email" name="email" type="email" placeholder="ivanov@company.ru">
+        </div>
+        <div class="form-field">
+          <label for="department">Отдел</label>
+          <input id="department" name="department" type="text" placeholder="Например, IT-отдел">
+        </div>
+        <div class="form-field">
+          <label for="password">Пароль</label>
+          <input id="password" name="password" type="password" placeholder="Минимум 6 символов" required>
+        </div>
+        <div class="form-field">
+          <label for="password_repeat">Повторите пароль</label>
+          <input id="password_repeat" name="password_repeat" type="password" placeholder="Повторите пароль" required>
+        </div>
+        <div class="form-options single-link">
+          <a href="{{ url_for('login') }}">Уже есть аккаунт? Войти</a>
+        </div>
+        <div class="form-field">
+          <input type="submit" class="btn btn-signin" value="Создать аккаунт">
+        </div>
+      </form>
+
+      <div class="links">
+        <a href="#">Внутренние правила</a>
+        <a href="#">Защита данных</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

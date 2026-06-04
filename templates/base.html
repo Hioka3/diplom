@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Корпоративный портал{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <button class="floating-theme-toggle" type="button" id="themeToggle" aria-label="Переключить тему">Тёмная тема</button>
+  <header class="topbar shell">
+    <a class="brand logo-brand" href="{{ url_for('index') }}" aria-label="Корпоративные новости">
+      <img class="header-logo" src="{{ url_for('static', filename='img/corporate_news_logo.png') }}" alt="Корпоративные новости">
+    </a>
+    {% if current_user %}
+    <nav class="nav">
+      <a href="{{ url_for('index') }}">Лента</a>
+      <a href="{{ url_for('events') }}">Календарь</a>
+      <a href="{{ url_for('employees') }}">Сотрудники</a>
+      <a href="{{ url_for('portal_search') }}">Поиск</a>
+      {% if current_user.role in ['admin','editor'] %}
+        <a href="{{ url_for('post_new') }}">Новая публикация</a>
+        <a href="{{ url_for('admin_content') }}">Контент</a>
+        <a href="{{ url_for('categories_admin') }}">Категории</a>
+      {% endif %}
+      {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}">Аналитика</a>
+        <a href="{{ url_for('users_admin') }}">Пользователи</a>
+        <a href="{{ url_for('admin_settings') }}">Оповещения</a>
+      {% endif %}
+    </nav>
+    <div class="header-actions">
+      <div class="user-pill compact-user">
+        <a class="profile-avatar-link" href="{{ url_for('profile') }}" title="Открыть профиль">
+          {% if current_user.avatar_path %}
+            <img class="mini-avatar" src="{{ url_for('uploaded_file', filename=current_user.avatar_path) }}" alt="Профиль">
+          {% else %}
+            <span class="mini-avatar initials">{{ current_user.full_name[:1] }}</span>
+          {% endif %}
+        </a>
+        <a class="logout-link" href="{{ url_for('logout') }}">Выйти</a>
+      </div>
+    </div>
+    {% endif %}
+  </header>
+
+  <main class="shell main-shell">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="alerts">
+          {% for category, message in messages %}<div class="alert {{ category }}">{{ message }}</div>{% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <button class="scroll-top-btn" type="button" id="scrollTopBtn" aria-label="Прокрутить вверх">↑</button>
+
+  {% if current_user and notification_settings.get('notifications_enabled') == '1' and latest_important_post %}
+  <aside class="important-toast" id="importantNewsToast" data-post-id="{{ latest_important_post.id }}">
+    <div class="important-toast__badge">Важная новость</div>
+    <h3 class="important-toast__title">{{ latest_important_post.title }}</h3>
+    <p class="important-toast__text">{{ notification_settings.get('notification_text', 'Опубликована важная корпоративная новость.') }}</p>
+    <div class="important-toast__actions">
+      <a class="btn primary" href="{{ url_for('post_detail', post_id=latest_important_post.id) }}">Открыть</a>
+      <button class="btn ghost" type="button" id="toastCloseBtn">Закрыть</button>
+    </div>
+  </aside>
+  {% endif %}
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

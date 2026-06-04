@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<section class="feed-column single-post-layout">
+  <article class="detail-post">
+    <div class="detail-head">
+      <div class="post-meta-row">
+        <div class="meta-left"><span class="category-chip soft">{{ post.category_name }}</span>{% if post.is_important %}<span class="badge-flag small">Закреплено</span>{% endif %}</div>
+        <time>{{ post.published_at.strftime('%d.%m.%Y %H:%M') }}</time>
+      </div>
+      <h1>{{ post.title }}</h1>
+      <p class="lead">{{ post.short_text }}</p>
+      <div class="post-tags">{% for tag in post.tags %}<a href="{{ url_for('index', tag=tag) }}">#{{ tag }}</a>{% endfor %}</div>
+      <div class="post-info-line"><span>Подразделение: {{ post.department or 'Все подразделения' }}</span><span>Просмотры: {{ post.views_count }}</span><span>Автор: <a href="{{ url_for('employee_public', user_id=post.author_id) }}">{{ post.author_name }}</a></span></div>
+    </div>
+    {% if post.image_path %}
+      {% if post.image_path.split('.')[-1].lower() in ['png','jpg','jpeg','gif','webp'] %}<img class="detail-image" src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="{{ post.title }}">{% else %}<a class="file-link" href="{{ url_for('uploaded_file', filename=post.image_path) }}">Скачать вложение: {{ post.image_path }}</a>{% endif %}
+    {% endif %}
+    {% if photos %}<div class="photo-gallery">{% for photo in photos %}<a href="{{ url_for('uploaded_file', filename=photo.file_path) }}"><img src="{{ url_for('uploaded_file', filename=photo.file_path) }}" alt="Фото публикации"></a>{% endfor %}</div>{% endif %}
+    <div class="article-text">{{ post.body | replace('\n', '<br>') | safe }}</div>
+    <div class="detail-social">
+      <form method="post" action="{{ url_for('post_like', post_id=post.id) }}"><button class="action-btn large {% if post.current_user_liked %}active{% endif %}" type="submit">Нравится {{ post.likes_count }}</button></form>
+      <span class="action-stat">Комментарии {{ post.comments_count }}</span>
+      <div class="emoji-strip wide">{% for emoji in reaction_emojis %}<form method="post" action="{{ url_for('post_reaction', post_id=post.id) }}"><input type="hidden" name="emoji" value="{{ emoji }}"><button class="emoji-btn" type="submit">{{ emoji }}</button></form>{% endfor %}</div>
+    </div>
+    <div class="reaction-summary detail-summary">{% for reaction in post.reaction_summary %}<span class="reaction-badge {% if reaction.reacted_by_me %}mine{% endif %}">{{ reaction.emoji }} {{ reaction.cnt }}</span>{% else %}<span class="muted">Реакций пока нет</span>{% endfor %}</div>
+    <div class="detail-actions">
+      <a class="btn ghost" href="{{ url_for('index') }}">Назад</a>
+      {% if current_user.role == 'admin' or (current_user.role == 'editor' and post.author_id == current_user.id) %}
+        <a class="btn" href="{{ url_for('post_edit', post_id=post.id) }}">Редактировать</a>
+        <form method="post" action="{{ url_for('post_delete', post_id=post.id) }}" data-confirm="Удалить публикацию?"><button class="btn danger" type="submit">Удалить</button></form>
+      {% endif %}
+    </div>
+  </article>
+
+  <section class="comments-panel" id="comments">
+    <div class="comments-head"><h2>Комментарии</h2><span>{{ post.comments_count }}</span></div>
+    <form class="comment-form" method="post" action="{{ url_for('post_comment', post_id=post.id) }}">
+      <textarea name="body" rows="4" required placeholder="Напишите комментарий..."></textarea>
+      <button class="btn primary" type="submit">Отправить</button>
+    </form>
+    <div class="comments-list">
+      {% for comment in comments %}
+      <article class="comment-card">
+        <div class="comment-top"><strong><a href="{{ url_for('employee_public', user_id=comment.user_id) }}">{{ comment.full_name }}</a></strong><span>{{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}</span></div>
+        <p>{{ comment.body }}</p>
+        <form class="reply-form" method="post" action="{{ url_for('post_comment', post_id=post.id) }}">
+          <input type="hidden" name="parent_id" value="{{ comment.id }}">
+          <input name="body" placeholder="Ответить на комментарий" required>
+          <button class="btn ghost" type="submit">Ответить</button>
+        </form>
+        {% for reply in replies.get(comment.id, []) %}
+          <div class="comment-card reply-card"><div class="comment-top"><strong><a href="{{ url_for('employee_public', user_id=reply.user_id) }}">{{ reply.full_name }}</a></strong><span>{{ reply.created_at.strftime('%d.%m.%Y %H:%M') }}</span></div><p>{{ reply.body }}</p></div>
+        {% endfor %}
+      </article>
+      {% else %}<div class="empty-card small">Пока нет комментариев. Станьте первым.</div>{% endfor %}
+    </div>
+  </section>
+</section>
+{% endblock %}

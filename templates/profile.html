@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Профиль сотрудника{% endblock %}
+{% block content %}
+<section class="profile-layout">
+  <aside class="profile-card">
+    {% if user.avatar_path %}<img class="profile-avatar" src="{{ url_for('uploaded_file', filename=user.avatar_path) }}" alt="Фото профиля">{% else %}<div class="profile-avatar placeholder-avatar">{{ user.full_name[:1] }}</div>{% endif %}
+    <h1>{{ user.full_name }}</h1>
+    <p class="profile-role">{{ roles[user.role] }}</p>
+    <div class="profile-info"><span>Логин</span><b>{{ user.username }}</b><span>Отдел</span><b>{{ user.department or 'Не указан' }}</b><span>Должность</span><b>{{ user.position or 'Не указана' }}</b><span>Email</span><b>{{ user.email or 'Не указан' }}</b><span>Телефон</span><b>{{ user.phone or 'Не указан' }}</b></div>
+    <div class="profile-stats"><div><strong>{{ stats.posts_count }}</strong><span>Постов</span></div><div><strong>{{ stats.comments_count }}</strong><span>Комментариев</span></div><div><strong>{{ stats.likes_count }}</strong><span>Лайков</span></div></div>
+  </aside>
+  <section class="profile-content-stack">
+    {% if editable %}
+    <section class="form-card profile-form-card">
+      <p class="eyebrow">личный кабинет</p><h1>Профиль сотрудника</h1>
+      <form method="post" enctype="multipart/form-data" class="stack-form">
+        <div class="two-cols"><label>ФИО<input name="full_name" required value="{{ user.full_name or '' }}"></label><label>Email<input name="email" type="email" value="{{ user.email or '' }}"></label></div>
+        <div class="two-cols"><label>Отдел<input name="department" value="{{ user.department or '' }}"></label><label>Должность<input name="position" value="{{ user.position or '' }}"></label></div>
+        <label>Телефон<input name="phone" value="{{ user.phone or '' }}"></label>
+        <label>О себе<textarea name="about" rows="5">{{ user.about or '' }}</textarea></label>
+        <label class="upload-zone">Фотография профиля<input type="file" name="avatar" accept="image/*"></label>
+        <div class="actions"><button class="btn primary" type="submit">Сохранить профиль</button><a class="btn ghost" href="{{ url_for('index') }}">Вернуться в ленту</a></div>
+      </form>
+    </section>
+    {% else %}
+    <section class="form-card"><p class="eyebrow">карточка сотрудника</p><h1>Информация о сотруднике</h1><p class="profile-note">{{ user.about or 'Описание пока не заполнено.' }}</p></section>
+    {% endif %}
+    <section class="table-card"><h2>Опубликованные новости</h2><table><tr><th>Дата</th><th>Новость</th><th>Категория</th><th>Просмотры</th></tr>{% for p in authored_posts %}<tr><td>{{ p.published_at.strftime('%d.%m.%Y') }}</td><td><a href="{{ url_for('post_detail', post_id=p.id) }}">{{ p.title }}</a></td><td>{{ p.category_name }}</td><td>{{ p.views_count }}</td></tr>{% else %}<tr><td colspan="4">Публикаций пока нет.</td></tr>{% endfor %}</table></section>
+    <section class="table-card"><h2>Активность</h2><table><tr><th>Дата</th><th>Действие</th><th>Публикация</th></tr>{% for a in activity %}<tr><td>{{ a.created_at.strftime('%d.%m.%Y %H:%M') }}</td><td>{{ 'Комментарий' if a.type == 'comment' else 'Лайк' }}</td><td><a href="{{ url_for('post_detail', post_id=a.post_id) }}">{{ a.post_title }}</a></td></tr>{% else %}<tr><td colspan="3">Активности пока нет.</td></tr>{% endfor %}</table></section>
+  </section>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="form-card">
+  <p class="eyebrow">публикация</p>
+  <h1>{{ 'Редактирование новости' if post else 'Создание новости' }}</h1>
+  <p class="profile-note">Заполните текст, категорию, подразделение, теги и при необходимости добавьте фотографии.</p>
+  <form method="post" enctype="multipart/form-data" class="stack-form">
+    <label>Заголовок<input name="title" required value="{{ post.title if post else '' }}"></label>
+    <label>Краткое описание<textarea name="short_text" required rows="3">{{ post.short_text if post else '' }}</textarea></label>
+    <label>Основной текст<textarea name="body" required rows="10">{{ post.body if post else '' }}</textarea></label>
+    <div class="two-cols">
+      <label>Категория<select name="category_id" required>{% for c in categories %}<option value="{{ c.id }}" {% if post and post.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></label>
+      <label>Подразделение<input name="department" list="departments" value="{{ post.department if post else 'Все подразделения' }}"><datalist id="departments"><option value="Все подразделения">{% for d in departments %}<option value="{{ d }}">{% endfor %}</datalist></label>
+    </div>
+    <label>Теги<input name="tags" value="{{ tag_string or '' }}" placeholder="например: безопасность, отпуск, it"></label>
+    <div class="two-cols">
+      <label class="upload-zone">Главная фотография поста<input type="file" name="image" accept="image/*"></label>
+      <label class="upload-zone">Дополнительные фотографии<input type="file" name="photos" accept="image/*" multiple></label>
+    </div>
+    {% if post and post.image_path %}<div class="current-photo-note">Текущий файл: <b>{{ post.image_path }}</b></div>{% endif %}
+    <label class="check"><input type="checkbox" name="is_important" {% if post and post.is_important %}checked{% endif %}> Закрепить как важную новость</label>
+    <div class="actions"><button class="btn primary" type="submit">Сохранить</button><a class="btn ghost" href="{{ url_for('index') }}">Отмена</a></div>
+  </form>
+</section>
+{% endblock %}
