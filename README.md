@@ -68,6 +68,8 @@ python app.py
 ```text
 http://127.0.0.1:5000
 ```
+![Главная страница пользователя редактор](Hioka3/diplom/screenshot/Screenshot_2.png)
 
+![Профиль](Hioka3/diplom/screenshot/Screenshot_3.png)
 
-
+![Главная страница пользователя администратор](Hioka3/diplom/screenshot/Screenshot_4.png)
